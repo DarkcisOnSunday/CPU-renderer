@@ -1,3 +1,4 @@
+#include "math/vec3.h"
 #include "math/vec4.h"
 #include <cmath>
 

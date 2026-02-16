@@ -1,5 +1,6 @@
 #pragma once
-#include "vec4.h"
+
+struct Vec4;
 
 struct Mat4 {
     // Column-major: m[col * 4 + row]
@@ -25,11 +26,7 @@ struct Mat4 {
     static Mat4 RotationY(float angleRad);
     static Mat4 RotationZ(float angleRad);
     static Mat4 Perspective(float fovRad, float aspect, float near, float far);
-    static Mat4 Orthographic(float left, float right, 
-                             float bottom, float top, 
-                             float near, float far);
+    static Mat4 Orthographic(float left, float right, float bottom, float top, float near, float far);
     
-    static Mat4 LookAt(const Vec4& eye,
-                       const Vec4& target,
-                       const Vec4& up);
+    static Mat4 LookAt(const Vec4& eye, const Vec4& target, const Vec4& up);
 };
