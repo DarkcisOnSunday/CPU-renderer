@@ -20,6 +20,11 @@ Vec3 Vec3::operator/(float scalar) const {
     return Vec3(x / scalar, y / scalar, z / scalar);
 }
 
+Vec3 Vec3::operator^(const Vec3& other) const {
+    Vec3 v = Vec3(x, y, z);
+    return v.Cross(other);
+}
+
 float Vec3::Length() const {
     return sqrtf(x*x + y*y + z*z);
 }

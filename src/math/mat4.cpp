@@ -116,8 +116,8 @@ Mat4 Mat4::LookAt(const Vec4& eye4, const Vec4& target4, const Vec4& up4)
 
     // LH: forward +Z
     Vec3 f = (target - eye).Normalized();
-    Vec3 r = up.Cross(f).Normalized();
-    Vec3 u = f.Cross(r);
+    Vec3 r = (up ^ f).Normalized();
+    Vec3 u = f ^ r;
 
     Mat4 m = Mat4::Identity();
 
