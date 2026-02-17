@@ -28,7 +28,7 @@ public:
 
     float* GetZBuffer() { return zBuffer_.data(); }
     
-    void Clear(uint32_t color = 0xFF000000) {
+    void Clear(const uint32_t& color = 0xFF000000) {
         std::fill(buffer_.begin(), buffer_.end(), color);
         ClearZBuffer();
     }

@@ -39,10 +39,44 @@ int main()
         double t = dcis::GetAppTimeSecondsBetween(start, dcis::GetAppTimeNow());
         fb.Clear();
 
-        UpdateScene(scene, cam, t);
+        UpdateScene(scene, t);
         renderer.Render(fb, rast, scene);
         window.PresentAppWindow(fb.GetBuffer(), fb.GetWidth(), fb.GetHeight());
-        
+
+        // -------- camera controls --------
+        const float moveSpeed = 1.5f;      // units/sec
+        const float mouseSens = 0.0025f;   // rad per pixel
+
+        // dt (у тебя Sleep 16ms, но лучше считать)
+        static double prevT = t;
+        float dt = (float)(t - prevT);
+        prevT = t;
+        if (dt > 0.1f) dt = 0.1f;
+
+        // look (hold RMB)
+        if (window.IsAppMouseDown(dcis::AppMouseButton::Right)) {
+            int dx, dy;
+            window.GetAppMouseDelta(dx, dy);
+
+            cam.AddYawPitch((float)dx * mouseSens, (float)dy * mouseSens);
+        }
+
+        // movement
+        Vec3 move(0,0,0);
+        if (window.IsAppKeyDown('A')) move.x -= 1.0f;
+        if (window.IsAppKeyDown('D')) move.x += 1.0f;
+        if (window.IsAppKeyDown('W')) move.z += 1.0f;
+        if (window.IsAppKeyDown('S')) move.z -= 1.0f;
+        if (window.IsAppKeyDown(0x20)) move.y += 1.0f;
+        if (window.IsAppKeyDown(0x11)) move.y -= 1.0f;
+
+        if (move.LengthSquared() > 0.0f) {
+            move = move.Normalized() * (moveSpeed * dt);
+            cam.MoveLocal(move);
+        }
+
+        cam.UpdateView();
+
         dcis::SleepAppMs(16);
     }
 

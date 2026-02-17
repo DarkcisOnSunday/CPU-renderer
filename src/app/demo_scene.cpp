@@ -44,28 +44,24 @@ static Mesh BuildCubeMesh()
     return m;
 }
 
-void UpdateScene(Scene& scene, Camera& cam, double time) {
+void UpdateScene(Scene& scene, double time) {
     scene.Clear();
 
     static Mesh cube = BuildCubeMesh();
 
-    float dz = 1.0f;
-    float angle = (float)(M_PI * time);
+    //float dz = 1.0f;
+    //float angle = (float)(M_PI * time);
 
-    RenderObject obj;
-    obj.mesh = &cube;
-    obj.model =
-        Mat4::Translation(0,0,dz) *
-        Mat4::RotationY(angle) *
-        Mat4::RotationX(30.0f * M_PI / 180.0f);
+    RenderObject obj1;
+    obj1.mesh = &cube;
+    obj1.model =
+        Mat4::Translation(0,0,1.0f);
+    scene.objects.push_back(obj1);
 
-    scene.objects.push_back(obj);
-
-    Vec3 center(obj.model(0,3), obj.model(1,3), obj.model(2,3));
-
-    float radius = 2.5f;
-    float yaw = (float)time * 0.8f;
-    float pitch = 0.35f;
-
-    cam.OrbitAround(center, radius, yaw, pitch);
+    RenderObject obj2;
+    obj2.mesh = &cube;
+    obj2.model =
+        Mat4::Translation(1.3f, 0.4f, 2.0f) *
+        Mat4::RotationY((float)time * 0.7f);
+    scene.objects.push_back(obj2);
 }

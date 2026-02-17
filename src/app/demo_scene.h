@@ -3,4 +3,4 @@
 struct Scene;
 struct Camera;
 
-void UpdateScene(Scene& scene, Camera& cam, double time);
+void UpdateScene(Scene& scene, double time);

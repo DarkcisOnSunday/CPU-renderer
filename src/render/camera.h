@@ -28,33 +28,20 @@ struct Camera {
     }
 
     Vec3 Forward() const {
-        // yaw=0,pitch=0 -> (0,0,1)  (Z-forward)
         float cy = std::cos(yaw),  sy = std::sin(yaw);
         float cp = std::cos(pitch),sp = std::sin(pitch);
         return Vec3(sy * cp, -sp, cy * cp);
     }
 
     Vec3 Right() const {
-        // right = up x forward  (LH, Z-forward)
-        Vec3 f = Forward();
-        return Vec3::Up().Cross(f).Normalized();
-    }
-
-    void UpdateView() {
-        Vec3 f = Forward();
-        Vec3 target = pos + f;
-        view = Mat4::LookAt(
-            Vec4(pos.x, pos.y, pos.z, 1.0f),
-            Vec4(target.x, target.y, target.z, 1.0f),
-            Vec4(0,1,0,0)
-        );
+        return (Vec3::Up() ^ Vec3::Forward()).Normalized();
     }
 
     void AddYawPitch(float dyaw, float dpitch) {
         yaw += dyaw;
         pitch += dpitch;
 
-        const float limit = 1.55334306f;
+        const float limit = (M_PI / 2.0f) - 1e-8f; //1.55334306f
         if (pitch >  limit) pitch =  limit;
         if (pitch < -limit) pitch = -limit;
     }
@@ -66,29 +53,13 @@ struct Camera {
         pos = pos + r * delta.x + u * delta.y + f * delta.z;
     }
 
-    void OrbitAround(const Vec3& center, float radius, float yawRad, float pitchRad)
-{
-    yaw = yawRad;
-    pitch = pitchRad;
-
-    const float limit = 1.55334306f;
-    if (pitch >  limit) pitch =  limit;
-    if (pitch < -limit) pitch = -limit;
-
-    float cy = std::cos(yaw),  sy = std::sin(yaw);
-    float cp = std::cos(pitch),sp = std::sin(pitch);
-
-    // позиция на сфере вокруг center
-    pos = Vec3(
-        center.x + radius * (sy * cp),
-        center.y + radius * (-sp),
-        center.z + radius * (-cy * cp)   // минус, чтобы при yaw=0 камера была "позади" по -Z
-    );
-
-    view = Mat4::LookAt(
-        Vec4(pos.x, pos.y, pos.z, 1),
-        Vec4(center.x, center.y, center.z, 1),
-        Vec4(0,1,0,0)
-    );
-}
+    void UpdateView() {
+        Vec3 f = Forward();
+        Vec3 target = pos + f;
+        view = Mat4::LookAt(
+            Vec4(pos.x, pos.y, pos.z, 1.0f),
+            Vec4(target.x, target.y, target.z, 1.0f),
+            Vec4(0,1,0,0)
+        );
+    }
 };
