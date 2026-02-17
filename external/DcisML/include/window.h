@@ -80,6 +80,7 @@ public:
     bool IsAppKeyDown(int key) const;
     bool IsAppMouseDown(AppMouseButton button) const;
     void GetAppMousePosition(int& outX, int& outY) const;
+    void GetAppMouseDelta(int& outX, int& outY) const;
 
     void GetAppWindowSize(int& outW, int& outH) const;
 
