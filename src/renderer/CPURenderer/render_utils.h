@@ -3,18 +3,21 @@
 #include "gfx/vertex.h"
 #include "render/camera.h"
 #include "render/viewport.h"
-#include "render/lerp.h"
+#include "core/lerp.h"
 #include "core/color.h"
 
 #include <vector>
 #include <algorithm>
 
-static void ModelToClipVertex(const std::vector<Vertex3D>& models, const Mat4& MVP, std::vector<VertexClip>& out)
+static void ModelToClipVertex(const std::vector<Vertex3D>& models, const Mat4& MVP, const Mat4& MV, std::vector<VertexClip>& out)
 {
     for (auto model : models) {
         VertexClip clip;
         clip.clip = MVP * Vec4(model.pos.x ,model.pos.y, model.pos.z, 1.0f);
         clip.color = UnpackColor(model.color);
+        clip.uv = model.uv;
+        Vec4 normal4 = (MV * Vec4(model.normal, 0));
+        clip.normal = normal4.XYZ().Normalized();
         out.push_back(clip);
     }
 }
@@ -63,6 +66,8 @@ static bool ClipToScreenVertex(const VertexClip& v, const Viewport& vp, VertexSc
 
     out.z = ndcZ;
     out.invW = invW;
-    out.color = v.color * invW;
+    out.colOverW = v.color * invW;
+    out.uvOverW = v.uv * invW;
+    out.nOverW = v.normal * invW;
     return true;
 }

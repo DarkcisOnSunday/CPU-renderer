@@ -1,12 +1,12 @@
 #pragma once
 
-#define _USE_MATH_DEFINES
-
 #include "math/vec3.h"
 #include "math/vec4.h"
 #include "math/mat4.h"
 
 #include <cmath>
+
+constexpr float PI = 3.14159265358979323846f;
 
 struct Camera {
     Vec3 pos {0,0,0};
@@ -14,7 +14,7 @@ struct Camera {
     float yaw = 0.0f;
     float pitch = 0.0f;
 
-    float fov_rad = 70.0f * M_PI / 180.0f;
+    float fov_rad = 70.0f * PI / 180.0f;
     float aspect = 1.0f;
     float z_near = 0.05f;
     float z_far = 40.0f;
@@ -34,14 +34,14 @@ struct Camera {
     }
 
     Vec3 Right() const {
-        return (Vec3::Up() ^ Vec3::Forward()).Normalized();
+        return (Vec3::Up() ^ Forward()).Normalized();
     }
 
     void AddYawPitch(float dyaw, float dpitch) {
         yaw += dyaw;
         pitch += dpitch;
 
-        const float limit = (M_PI / 2.0f) - 1e-8f; //1.55334306f
+        const float limit = (PI / 2.0f) - 1e-8f; //~1.55334306f
         if (pitch >  limit) pitch =  limit;
         if (pitch < -limit) pitch = -limit;
     }

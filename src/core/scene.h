@@ -2,11 +2,13 @@
 
 #include "math/mat4.h"
 #include "core/mesh.h"
+#include "core/material.h"
 
 #include <vector>
 
 struct RenderObject {
     const Mesh* mesh = nullptr;
+    const Material* material = nullptr;
     Mat4 model = Mat4::Identity();
 };
 

@@ -10,8 +10,6 @@ private:
     int height_;
     std::vector<uint32_t> buffer_;
     std::vector<float> zBuffer_;
-
-    void* windowHandle_ = nullptr;
     
 public:
     FrameBuffer(int width, int height) 

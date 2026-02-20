@@ -1,6 +1,7 @@
 #include "rasterizer.h"
 #include "frame_buffer.h"
 #include "core/color.h"
+#include "core/material.h"
 
 #include <cmath>
 #include <iostream>
@@ -57,7 +58,7 @@ void Rasterizer::DrawLine3D(FrameBuffer& image, const VertexScreen a, const Vert
 
     float steps = std::fabs(dx) > std::fabs(dy) ? std::fabs(dx) : std::fabs(dy);
     if (steps < 1.0f) {
-        image.SetPixel((int)x0, (int)y0, z0, PackColor(a.color));
+        image.SetPixel((int)x0, (int)y0, z0, PackColor(a.colOverW));
         return;
     }
 
@@ -67,7 +68,7 @@ void Rasterizer::DrawLine3D(FrameBuffer& image, const VertexScreen a, const Vert
 
     float x = x0, y = y0, z = z0;
     for (int i = 0; i <= (int)steps; i++) {
-        image.SetPixel((int)x, (int)y, z, PackColor(a.color));
+        image.SetPixel((int)x, (int)y, z, PackColor(a.colOverW));
         x += xInc;
         y += yInc;
         z += zInc;
@@ -148,7 +149,8 @@ void Rasterizer::DrawTriangle2D(FrameBuffer& image, int x1, int y1, int x2, int 
     }
 }
 
-void Rasterizer::DrawTriangle3D(FrameBuffer& image, VertexScreen v0, VertexScreen v1, VertexScreen v2)
+void Rasterizer::DrawTriangle3D(FrameBuffer& image, VertexScreen& v0, VertexScreen& v1, VertexScreen& v2, const Material& mat,
+                                const Vec3& Light, float ambient)
 {
     auto iMin = [](int a,int b){ return a<b?a:b; };
     auto iMax = [](int a,int b){ return a>b?a:b; };
@@ -200,20 +202,36 @@ void Rasterizer::DrawTriangle3D(FrameBuffer& image, VertexScreen v0, VertexScree
             float z = (l0*(v0.z*v0.invW) + l1*(v1.z*v1.invW) + l2*(v2.z*v2.invW)) * w;
 
             // color (persp-correct)
-            Vec4 colorV = v0.color * l0 + v1.color * l1 + v2.color * l2;
-            Vec4 rgba = colorV * w; // divide by invW
+            Vec4 colorV = v0.colOverW * l0 + v1.colOverW * l1 + v2.colOverW * l2;
+            Vec4 vtxColor = colorV * w;
 
-            uint32_t color = PackColor(rgba);
-            image.SetPixel(x, y, z, color);
+            // uv (persp-correct)
+            Vec2 uvOverW = v0.uvOverW * l0 + v1.uvOverW * l1 + v2.uvOverW * l2;
+            Vec2 uv = uvOverW * w;
+
+            // normal (persp-correct)
+            Vec3 nOverW = v0.nOverW * l0 + v1.nOverW * l1 + v2.nOverW * l2;
+            Vec3 normal = (nOverW * w).Normalized();
+
+            Vec4 albedo = mat.Eval(uv, vtxColor);
+
+            float ndotl = normal.Dot(Light);
+            if (ndotl < 0.0f) ndotl = 0.0f;
+            float lit = ambient + (1.0f - ambient) * ndotl;
+
+            Vec4 out(albedo.x, albedo.y * lit, albedo.z * lit, albedo.w * lit);
+            uint32_t packed = PackColor(out);
+
+            image.SetPixel(x, y, z, packed);
         }
     }
 }
 
 void Rasterizer::DrawTriangle3DScanline(FrameBuffer& image, VertexScreen v1, VertexScreen v2, VertexScreen v3)
 {
-    uint32_t v1col = PackColor(v1.color);
-    uint32_t v2col = PackColor(v2.color);
-    uint32_t v3col = PackColor(v3.color);
+    uint32_t v1col = PackColor(v1.colOverW);
+    uint32_t v2col = PackColor(v2.colOverW);
+    uint32_t v3col = PackColor(v3.colOverW);
     if (v1col != v2col || v2col != v3col)
         std::cerr << "Color gradient not implemented. Please choose same color for all 3 vertexes" << std::endl;
 

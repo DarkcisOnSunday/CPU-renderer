@@ -75,6 +75,9 @@ public:
 
     bool ProcessAppWindowEvents();
 
+    void* GetNativeHwnd() const;
+    void* GetNativeHinstance() const;
+
     bool PollAppEvent(AppEvent& outEvent);
 
     bool IsAppKeyDown(int key) const;
